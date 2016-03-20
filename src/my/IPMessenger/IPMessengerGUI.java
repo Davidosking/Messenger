@@ -1,4 +1,3 @@
-
 package my.IPMessenger;
 
 import java.awt.*;
@@ -14,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
@@ -26,15 +26,12 @@ import javax.swing.text.StyledDocument;
  */
 public class IPMessengerGUI extends javax.swing.JFrame {
 
-    
-    static String text;
     static int test;
     static boolean lever;
     static Connection connection;
     static StyledDocument doc;
     Style style2;
     SwingWorker worker;
-    
 
     /**
      * Creates new form IPMessengerGUI
@@ -49,8 +46,6 @@ public class IPMessengerGUI extends javax.swing.JFrame {
         textDisplayBox.setEditable(false);
         style2 = textDisplayBox.addStyle("I'm a Style", null);
         StyleConstants.setForeground(style2, Color.black);
-        
-        
 
     }
 
@@ -96,8 +91,11 @@ public class IPMessengerGUI extends javax.swing.JFrame {
         textEntryBox.setLineWrap(true);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
+        jScrollPane3.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        textDisplayBox.setSize(50, 50);
+        //jScrollPane3.setSize(50, 50);
         jScrollPane3.setViewportView(textDisplayBox);
+        //jScrollPane3.setSize(100, 100);
 
         sendButton.setText("Send");
         sendButton.addActionListener(new java.awt.event.ActionListener() {
@@ -154,7 +152,8 @@ public class IPMessengerGUI extends javax.swing.JFrame {
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panel1Layout.createSequentialGroup()
                         .addComponent(separator, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                        //.addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3)
                         .addGap(18, 18, 18)
                         .addGroup(panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(sendButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -201,17 +200,14 @@ public class IPMessengerGUI extends javax.swing.JFrame {
     }// </editor-fold>                        
 
     private void search() throws IOException {
+        Style style = textDisplayBox.addStyle("I'm a Style", null);
+        StyleConstants.setBackground(style, Color.cyan);
 
-        lever = true;
-        int b = 0;
-        text = "";
+   
         disconnectButton.setEnabled(true);
         sendButton.setEnabled(true);
-        while (lever) {
+        while (true) {
 
-            if (b == 11) {
-                b = 0;
-            }
 
             if (connection.getSocket().isConnected()) {
 
@@ -223,43 +219,24 @@ public class IPMessengerGUI extends javax.swing.JFrame {
             }
 
             if (connection.getInBuffReader().ready()) {
-                
-                ArrayList<Character> te = new ArrayList();
-
+               
+                String inputString = "";
+                System.out.println(inputString);
                 while (connection.getInBuffReader().ready()) {
-
-                    char[] charHolder = new char[1000];
-
-                    connection.getInBuffReader().read(charHolder);
-                    for (int i = 0; i < charHolder.length; i++) {
-                        if (charHolder[i] != 0) {
-                           
-                            te.add(charHolder[i]);
-                        }
-                    }
-                    for (int i = 0; i < te.size(); i++) {
-                        text += te.get(i);
-                    }
-
-                    te.clear();
-                    long temp = System.currentTimeMillis();
-                    while (System.currentTimeMillis() - temp < 2000) {
-
-                    }
-
+                    inputString += (char) connection.getInBuffReader().read();
+                    
                 }
+                
 
-                if (text != "" && text != null && text != " " && !(connection.getInBuffReader().ready())) {
-                    Style style = textDisplayBox.addStyle("I'm a Style", null);
-                    StyleConstants.setBackground(style, Color.cyan);
-                    //System.out.println("ffg");
-                    if (text.equals("IPMESSEXITCODE9041X")) {
+                if (inputString != "" && inputString != null && inputString != " " && !(connection.getInBuffReader().ready())) {
+
+                    if (inputString.equals("IPMESSEXITCODE9041X")) {
                         notConnected();
                         worker.cancel(true);
 
                     }
                     try {
-                        doc.insertString(doc.getLength(), "\nThey said: \n" + text, style);
+                        doc.insertString(doc.getLength(), "\nThey said: \n" + lineSplitter(inputString), style);
 
                         this.toFront();
                         Toolkit.getDefaultToolkit().beep();
@@ -268,16 +245,34 @@ public class IPMessengerGUI extends javax.swing.JFrame {
                     } catch (BadLocationException ex) {
                         Logger.getLogger(IPMessengerGUI.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    text = "";
+                    inputString = "";
 
                 }
 
             }
 
-            b++;
+        
 
-//            }
         }
+    }
+    private String lineSplitter(String text){
+        int counter = 0;
+        if(text.length() <= 79){
+            return text;
+        }
+        else for(int i = 0 ; i < text.length(); i ++){
+            counter++;
+            if(counter >=80 && text.charAt(i) == ' '){
+                text = text.substring(0, i-1) + '\n' + text.substring(i+1);
+                counter = 0;
+            }
+            else if(counter >=110 && text.charAt(i) != ' '){
+                text = text.substring(0, i-1) + '-' +'\n' + text.substring(i+1);
+                counter = 0;
+            }
+        }
+        return text;
+        
     }
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -305,10 +300,11 @@ public class IPMessengerGUI extends javax.swing.JFrame {
         notConnected();
 
     }
-    
-    private String stringBreaker(String string){
-        
-    return string;}
+
+    private String stringBreaker(String string) {
+
+        return string;
+    }
 
     private void notConnected() {
         lever = false;
@@ -323,8 +319,8 @@ public class IPMessengerGUI extends javax.swing.JFrame {
     private void sendData(String string) {
         try {
             if (!string.equals("IPMESSEXITCODE9041X")) {
-                doc.insertString(doc.getLength(), "\nMe: \n" + textEntryBox.getText(), style2);
-                
+                doc.insertString(doc.getLength(), "\nMe: \n" + lineSplitter(textEntryBox.getText()), style2);
+
             }
         } catch (BadLocationException ex) {
             Logger.getLogger(IPMessengerGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -332,7 +328,7 @@ public class IPMessengerGUI extends javax.swing.JFrame {
 
         try {
 
-            connection.getOutStream().writeBytes(string);
+            connection.getOutStream().append(string);
 
             connection.getOutStream().flush();
         } catch (NullPointerException | IOException ex) {

@@ -1,10 +1,13 @@
 package my.IPMessenger;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -24,7 +27,7 @@ public class Connection {
 
     private static ServerSocket serverSocket;
     private static BufferedReader inBuffReader;
-    private static DataOutputStream outStream;
+    private static BufferedWriter outStream;
     private static Socket socket;
     private static Socket socket2;
 
@@ -59,15 +62,15 @@ public class Connection {
     /**
      * @return the outStream
      */
-    public static DataOutputStream getOutStream() {
+    public static BufferedWriter getOutStream() {
         return outStream;
     }
 
     /**
-     * @param aOutStream the outStream to set
+     * @param OutStream the outStream to set
      */
-    public static void setOutStream(DataOutputStream aOutStream) {
-        outStream = aOutStream;
+    public static void setOutStream(BufferedWriter OutStream) {
+        outStream = OutStream;
     }
 
     /**
@@ -119,7 +122,7 @@ public class Connection {
         }
 
         try {
-            setOutStream(new DataOutputStream(getSocket().getOutputStream()));
+            setOutStream(new BufferedWriter(new OutputStreamWriter(getSocket().getOutputStream())));
         } catch (IOException ex) {
             Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -140,7 +143,7 @@ public class Connection {
         }
 
         try {
-            setOutStream(new DataOutputStream(getSocket().getOutputStream()));
+            setOutStream(new BufferedWriter(new OutputStreamWriter(getSocket().getOutputStream())));
         } catch (IOException ex) {
             Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         }
