@@ -28,7 +28,7 @@ public class Connection {
     private static BufferedReader inBuffReader;
     private static BufferedWriter outStream;
     private static Socket socket;
-    private static SwingWorker workerThread;
+    
 
     /**
      * @return the serverSocket
@@ -93,7 +93,11 @@ public class Connection {
      */
     public void hostConnection(int port){
        
-       
+     
+
+               
+
+                
         
                 try {
                     setServerSocket(new ServerSocket(port));
@@ -102,18 +106,19 @@ public class Connection {
                     Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                try {
-                    setSocket(getServerSocket().accept());
-                
-
-            }
-            catch (IOException ex
-
-            
-                ) {
-            JOptionPane.showMessageDialog(null, "There was a problem hosting your connection: accepting server socket ");
-                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
-            }
+//                try {
+//                    setSocket(getServerSocket().accept());
+//                
+//
+//            }
+//            catch (IOException ex
+//
+//            
+//                ) 
+//            {
+//            JOptionPane.showMessageDialog(null, "There was a problem hosting your connection: accepting server socket ");
+//                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+//            }
 
             
                 try {
@@ -140,7 +145,7 @@ public class Connection {
             }
         
     
-    
+   
 
 }
 
@@ -198,5 +203,21 @@ public void connectToHost(String ip, int port) {
 
 .getName()).log(Level.SEVERE, null, ex);
         }
+        try {
+            serverSocket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            inBuffReader.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            outStream.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
     }
 }

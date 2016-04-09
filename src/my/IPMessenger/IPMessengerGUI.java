@@ -3,10 +3,8 @@ package my.IPMessenger;
 import java.awt.*;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.sql.DriverManager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -42,6 +40,7 @@ public class IPMessengerGUI extends javax.swing.JFrame {
     private StyledDocument doc;
     private Style style2;
     private SwingWorker worker;
+    private boolean loopTrigger;
 
     /**
      * Creates new form IPMessengerGUI.
@@ -71,6 +70,9 @@ public class IPMessengerGUI extends javax.swing.JFrame {
         };
 
         worker.execute();
+        
+        
+        
 
     }
 
@@ -213,18 +215,21 @@ public class IPMessengerGUI extends javax.swing.JFrame {
      * @throws IOException
      */
     private void search() {
+        loopTrigger = true;
         Style style = textDisplayBox.addStyle("I'm a Style", null);
         StyleConstants.setBackground(style, Color.cyan);
 
         disconnectButton.setEnabled(true);
         sendButton.setEnabled(true);
-        while (true) {
+        while (loopTrigger) {
 
             if (connection.getSocket().isConnected()) {
+                if (!worker.isDone()) {
+                    connectionStatusLabel.setText("Connected");
+                    hostButton.setEnabled(false);
+                    connectButton.setEnabled(false);
+                }
 
-                connectionStatusLabel.setText("Connected");
-                hostButton.setEnabled(false);
-                connectButton.setEnabled(false);
             }
 
             try {
@@ -236,13 +241,11 @@ public class IPMessengerGUI extends javax.swing.JFrame {
                         inputString += (char) connection.getInBuffReader().read();
 
                     }
-
                     if (inputString != "" && inputString != null && inputString != " " && !(connection.getInBuffReader().ready())) {
-
                         if (inputString.equals("IPMESSEXITCODE9041X")) {
                             notConnected();
-                            worker.cancel(true);
-
+                            this.worker.cancel(true);
+                            return;
                         }
                         try {
                             doc.insertString(doc.getLength(), "\nThey said: \n" + lineSplitter(inputString), style);
@@ -311,11 +314,13 @@ public class IPMessengerGUI extends javax.swing.JFrame {
      * @param evt
      */
     private void hostActionPerformed(ActionEvent evt) {
+
         
         connection.hostConnection(6880);
-
         start2();
     }
+
+    
 
     /**
      * responds to connect button click by asking for and connecting too IP
@@ -324,9 +329,11 @@ public class IPMessengerGUI extends javax.swing.JFrame {
      * @param evt
      */
     private void connectActionPerformed(ActionEvent evt) {
-
+        DriverManager c = null;
         String ip = JOptionPane.showInputDialog("Enter Server IP:");
+
         connection.connectToHost(ip, 6880);
+
         start2();
     }
 
@@ -347,13 +354,16 @@ public class IPMessengerGUI extends javax.swing.JFrame {
      * Ends connection.
      */
     private void notConnected() {
-        worker.cancel(true);
-        connectionStatusLabel.setText("Disconnected");
-        hostButton.setEnabled(true);
-        connectButton.setEnabled(true);
-        disconnectButton.setEnabled(false);
-        sendButton.setEnabled(false);
+        
+        loopTrigger = false;
+        //this.worker.cancel(true);
+        this.connectionStatusLabel.setText("Disconnected");
+        this.hostButton.setEnabled(true);
+        this.connectButton.setEnabled(true);
+        this.disconnectButton.setEnabled(false);
+        this.sendButton.setEnabled(false);
         connection.Disconnect();
+
     }
 
     /**
@@ -367,6 +377,7 @@ public class IPMessengerGUI extends javax.swing.JFrame {
                 doc.insertString(doc.getLength(), "\nMe: \n" + lineSplitter(textEntryBox.getText()), style2);
 
             }
+
         } catch (BadLocationException ex) {
             Logger.getLogger(IPMessengerGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -382,16 +393,11 @@ public class IPMessengerGUI extends javax.swing.JFrame {
         textEntryBox.setText(null);
     }
 
-   
-        
-        
-                
-        
-        /**
-         * Main method
-         *
-         * @param args the command line arguments
-         */
+    /**
+     * Main method
+     *
+     * @param args the command line arguments
+     */
     public static void main(String args[]) throws IOException {
 
         try {
