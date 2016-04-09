@@ -106,19 +106,13 @@ public class Connection {
                     Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-//                try {
-//                    setSocket(getServerSocket().accept());
-//                
-//
-//            }
-//            catch (IOException ex
-//
-//            
-//                ) 
-//            {
-//            JOptionPane.showMessageDialog(null, "There was a problem hosting your connection: accepting server socket ");
-//                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+        try {
+            setSocket(getServerSocket().accept());
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "There was a problem hosting your connection: accepting server socket ");
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
             
                 try {
